@@ -1,10 +1,15 @@
 import * as Store from './Store'
 import * as Game from './Game'
+import { pipeline } from './Utils'
 
 interface GameClientState {
   game: Game.Game
   dom: {
-    startBtn: HTMLButtonElement,
+    startBtn: Element,
+  },
+  network: {
+    peerConnection: RTCPeerConnection,
+    dataChannel: RTCDataChannel,
   }
 }
 
@@ -13,20 +18,44 @@ export const boot = (): void => {
     game: Game.create(),
     dom: {
       startBtn: null,
+    },
+    network: {
+      peerConnection: null,
+      dataChannel: null,
     }
   })
-  Store.map(s)(mountDOM(s))
+  Store.map(s)(pipeline([
+    mountDOM(s),
+    connectNetwork(s),
+  ]))
+  
 }
 
 const mountDOM = (store: Store.Store<GameClientState>) => (s: GameClientState): GameClientState => {
-  s.dom.startBtn.addEventListener('click', () => Store.map(store)(onDOMStartGame))
+  document.body.innerHTML = `
+  <button id="start">Start</button>
+  `
 
+  const startBtn = document.querySelector('#start')
+
+  startBtn.addEventListener('click', () => Store.map(store)(onDOMStartGame))
+
+  return {
+    ...s,
+    dom: {
+      startBtn
+    }
+  }
+}
+
+const connectNetwork = (store: Store.Store<GameClientState>) => (s: GameClientState): GameClientState => {
+}
+
+const onDOMStartGame = (s: GameClientState): GameClientState => {
   return {
     ...s
   }
 }
-
-const onDOMStartGame = (s: GameClientState): GameClientState => null
 
 const onNetworkReceiveGameState: (gcs: GameClientState) => (gs: GameState): GameClientState => null
 

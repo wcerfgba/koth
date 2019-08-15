@@ -1,0 +1,1 @@
+export const pipeline = (fs: Array<(x: any) => any>) => (x: any): any => fs.reduce((y, f) => f(y), x)
