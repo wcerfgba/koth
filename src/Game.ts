@@ -131,16 +131,28 @@ const generateActivePlayerUpdates = (game: Game): Array<SetCellUpdate> =>
     }))
 
 const tickCell = (game: Game) => (location: Location): Cell => {
+  const cell = cellAtLocation(game)(location)
+
+  return (
+    (0 <= cell.value) && (cell.owner === null) && 
+  )
+}
+
+
+
+{
+  const cell = cellAtLocation(game)(location)
   const playersInCell = game.players.filter(player => player.location === location)
   const neighbourCells = neighbours(location).map(cellAtLocation(game))
-  const playerFeedIns = 
-    playersInCell.map(player => ({
+  const playerFeedIns = new Map(
+    playersInCell.map(player => ([
       player,
-      feedIn:
-        neighbourCells
-          .filter(cell => cell.owner === player)
-          .reduce((feedIn, cell) => feedIn + (cell.value * game.feedInFactor), 0)
-    }))
+      -(neighbourCells
+        .filter(cell => cell.owner === player)
+        .reduce((feedIn, cell) => feedIn + (cell.value * game.feedInFactor), 0))
+    ]))
+  )
+  
 }
 
 const cellAtLocation = (game: Game) => (location: Location): Cell =>
