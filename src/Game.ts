@@ -3,6 +3,9 @@ import { _if } from './Utils'
 export interface Game {
   grid: Grid,
   players: Array<Player>,
+  
+  feedInFactor: number,
+
   tick: number,
 }
 
@@ -110,6 +113,9 @@ export const create = (): Game => ({
     }
   ],
   players: [],
+
+  feedInFactor: 0.2,
+
   tick: 0,
 })
 
@@ -124,11 +130,22 @@ const generateActivePlayerUpdates = (game: Game): Array<SetCellUpdate> =>
       value: tickCell(game)(player.location).value,
     }))
 
-const tickCell = (game: Game) => (location: Location): Cell => ({})
+const tickCell = (game: Game) => (location: Location): Cell => {
+  const playersInCell = game.players.filter(player => player.location === location)
+  const neighbourCells = neighbours(location).map(cellAtLocation(game))
+  const playerFeedIns = 
+    playersInCell.map(player => ({
+      player,
+      feedIn:
+        neighbourCells
+          .filter(cell => cell.owner === player)
+          .reduce((feedIn, cell) => feedIn + (cell.value * game.feedInFactor), 0)
+    }))
+}
 
-const cell = (grid: Grid) => (location: Location): Cell =>
+const cellAtLocation = (game: Game) => (location: Location): Cell =>
   _if(isWallLocation(location))
-    (grid[location[0]][location[1]][location[2]])
-    (grid[location[0]][location[1]])
+    (game.grid[location[0]][location[1]][location[2]])
+    (game.grid[location[0]][location[1]])
 
 const neighbours = (location: Location): [Location, Location, Location, Location] => []
